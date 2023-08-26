@@ -49,7 +49,7 @@ describe('AuthController (e2e)', () => {
     });
 
     describe('with invalid credentials', () => {
-      it('should return a 401 response with an error', () => {
+      it('returns a 401 response with an error', () => {
         return request(app.getHttpServer())
           .post('/auth/sign_in')
           .send({ username: USER_USERNAME, password: 'invalid' })

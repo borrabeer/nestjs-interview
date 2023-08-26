@@ -1,19 +1,20 @@
+import { INestApplication } from '@nestjs/common';
+import { Category } from './entities/category.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../app.module';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
+import { CategoriesService } from './category.service';
 import { mainConfig } from '../main.config';
+import * as request from 'supertest';
 import { JwtDto } from '../auth/dto/jwt.dto';
 import { AuthService } from '../auth/auth.service';
+import {
+  USER_PASSWORD,
+  USER_USERNAME,
+} from '../current-user/current-user.e2e.spec';
 
-const USER_USERNAME = 'username';
-const USER_PASSWORD = 'password';
-
-describe('UsersController (e2e)', () => {
+describe('CategoriesController (e2e)', () => {
   let app: INestApplication;
-  let user: User;
+  let category: Category;
   let token: JwtDto;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,15 +22,21 @@ describe('UsersController (e2e)', () => {
     }).compile();
 
     app = module.createNestApplication();
-    const usersService = module.get<UsersService>(UsersService);
+
+    const categoryService = module.get<CategoriesService>(CategoriesService);
+
     const authService = module.get<AuthService>(AuthService);
 
-    user = await usersService.create({
+    const user = await authService.signUp({
       username: USER_USERNAME,
-      encryptedPassword: USER_PASSWORD,
+      password: USER_PASSWORD,
     });
 
     token = authService.signIn(user);
+
+    category = await categoryService.create({
+      name: 'Test Category',
+    });
 
     mainConfig(app);
 
@@ -40,11 +47,11 @@ describe('UsersController (e2e)', () => {
     await app.close();
   });
 
-  describe('GET /users', () => {
+  describe('GET /categories', () => {
     describe('with valid credentials', () => {
-      it('returns a 200 response with an array of users', () => {
+      it('returns a 200 response with an array of categories', () => {
         return request(app.getHttpServer())
-          .get('/users')
+          .get('/categories')
           .set('Authorization', `Bearer ${token.accessToken}`)
           .then(({ statusCode }) => {
             expect(statusCode).toBe(200);
@@ -55,7 +62,7 @@ describe('UsersController (e2e)', () => {
     describe('with invalid credentials', () => {
       it('returns a 401 response with an error', () => {
         return request(app.getHttpServer())
-          .get('/users')
+          .get('/categories')
           .then(({ statusCode }) => {
             expect(statusCode).toBe(401);
           });
@@ -63,12 +70,12 @@ describe('UsersController (e2e)', () => {
     });
   });
 
-  describe('GET /users/{id}', () => {
-    describe('with valid credentials', () => {
-      describe('when user with id exists', () => {
-        it('returns a 200 response with a user', () => {
+  describe('GET /categories/{id}', () => {
+    describe('with valid credentails', () => {
+      describe('when category with id exists', () => {
+        it('returns a 200 response with a category', () => {
           return request(app.getHttpServer())
-            .get(`/users/${user.id}`)
+            .get(`/categories/${category.id}`)
             .set('Authorization', `Bearer ${token.accessToken}`)
             .then(({ statusCode }) => {
               expect(statusCode).toBe(200);
@@ -76,10 +83,10 @@ describe('UsersController (e2e)', () => {
         });
       });
 
-      describe('when user with id does not exist', () => {
-        it('returns a 404 response', () => {
+      describe('when category with id does not exist', () => {
+        it('returns a 404 response with an error', () => {
           return request(app.getHttpServer())
-            .get(`/users/1234`)
+            .get(`/categories/1234`)
             .set('Authorization', `Bearer ${token.accessToken}`)
             .then(({ statusCode }) => {
               expect(statusCode).toBe(404);
@@ -88,21 +95,21 @@ describe('UsersController (e2e)', () => {
       });
     });
 
-    describe('with invalid credentials', () => {
-      describe('when user with id exists', () => {
+    describe('with invalid credentails', () => {
+      describe('when category with id exists', () => {
         it('returns a 401 response with an error', () => {
           return request(app.getHttpServer())
-            .get(`/users/${user.id}`)
+            .get(`/categories/${category.id}`)
             .then(({ statusCode }) => {
               expect(statusCode).toBe(401);
             });
         });
       });
 
-      describe('when user with id does not exist', () => {
+      describe('when category with id does not exist', () => {
         it('returns a 401 response with an error', () => {
           return request(app.getHttpServer())
-            .get(`/users/1234`)
+            .get(`/categories/1234`)
             .then(({ statusCode }) => {
               expect(statusCode).toBe(401);
             });
