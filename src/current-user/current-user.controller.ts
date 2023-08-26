@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Patch,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/auth.decorator';
 import { User } from '../users/entities/user.entity';
@@ -35,11 +27,10 @@ export class CurrentUserController {
    */
 
   @Patch()
-  @HttpCode(HttpStatus.NO_CONTENT)
   async update(
     @Body() updateUserDto: UpdateCurrentUserDto,
     @CurrentUser() user: User,
-  ): Promise<void> {
-    await this.currentUserService.updateUser(user, updateUserDto);
+  ): Promise<User> {
+    return this.currentUserService.updateUser(user, updateUserDto);
   }
 }

@@ -7,8 +7,8 @@ import { mainConfig } from '../main.config';
 import { User } from '../users/entities/user.entity';
 import { JwtDto } from '../auth/dto/jwt.dto';
 
-const USER_USERNAME = 'username';
-const USER_PASSWORD = 'password';
+export const USER_USERNAME = 'username';
+export const USER_PASSWORD = 'password';
 
 describe('CurrentUserController (e2e)', () => {
   let app: INestApplication;
@@ -52,7 +52,7 @@ describe('CurrentUserController (e2e)', () => {
     });
 
     describe('with invalid credentials', () => {
-      it('should return a 401 response with an error', () => {
+      it('returns a 401 response with an error', () => {
         return request(app.getHttpServer())
           .get('/current_user')
           .then(({ statusCode }) => {
@@ -64,12 +64,12 @@ describe('CurrentUserController (e2e)', () => {
 
   describe('PATCH /current_user', () => {
     describe('with valid credentials', () => {
-      it('should return a 204 response', () => {
+      it('should return a 200 response', () => {
         return request(app.getHttpServer())
           .patch('/current_user')
           .set('Authorization', `Bearer ${token.accessToken}`)
           .then(({ statusCode }) => {
-            expect(statusCode).toBe(204);
+            expect(statusCode).toBe(200);
           });
       });
 
@@ -92,7 +92,7 @@ describe('CurrentUserController (e2e)', () => {
     });
 
     describe('with invalid credentials', () => {
-      it('should return a 401 response with an error', () => {
+      it('returns a 401 response with an error', () => {
         return request(app.getHttpServer())
           .patch('/current_user')
           .then(({ statusCode }) => {
