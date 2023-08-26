@@ -1,20 +1,33 @@
-import { Controller, Get, Patch } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/auth.decorator';
+import { User } from '../users/entities/user.entity';
+import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
+import { CurrentUserService } from './current-user.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Current User')
 @ApiBearerAuth()
 @Controller('current_user')
+@UseGuards(JwtAuthGuard)
 export class CurrentUserController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly currentUserService: CurrentUserService) {}
 
   /*
    * TODO: Return current user
    */
 
   @Get()
-  show() {
-    return 'Add your implementation here.';
+  show(@CurrentUser() user): User {
+    return user;
   }
 
   /*
@@ -22,7 +35,11 @@ export class CurrentUserController {
    */
 
   @Patch()
-  update() {
-    return 'Add your implementation here.';
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async update(
+    @Body() updateUserDto: UpdateCurrentUserDto,
+    @CurrentUser() user: User,
+  ): Promise<void> {
+    await this.currentUserService.updateUser(user, updateUserDto);
   }
 }

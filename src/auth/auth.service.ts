@@ -6,7 +6,7 @@ import { AuthDto } from './dto/auth.dto';
 import { JwtDto } from './dto/jwt.dto';
 import { JwtService } from '@nestjs/jwt';
 
-const SALT_ROUNDS = 10;
+export const SALT_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   signIn(user: User): JwtDto {
-    const payload = { username: user.username, userId: user.id };
+    const payload = { subject: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
     };
