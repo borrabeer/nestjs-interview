@@ -4,25 +4,31 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AuthService } from '../auth/auth.service';
 import { mainConfig } from '../main.config';
+import { User } from '../users/entities/user.entity';
+import { JwtDto } from '../auth/dto/jwt.dto';
 
 const USER_USERNAME = 'username';
 const USER_PASSWORD = 'password';
 
 describe('CurrentUserController (e2e)', () => {
   let app: INestApplication;
-
+  let authService: AuthService;
+  let user: User;
+  let token: JwtDto;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = module.createNestApplication();
-    const authService = module.get<AuthService>(AuthService);
+    authService = module.get<AuthService>(AuthService);
 
-    await authService.signUp({
+    user = await authService.signUp({
       username: USER_USERNAME,
       password: USER_PASSWORD,
     });
+
+    token = authService.signIn(user);
 
     mainConfig(app);
 
@@ -35,9 +41,10 @@ describe('CurrentUserController (e2e)', () => {
 
   describe('GET /current_user', () => {
     describe('with valid credentials', () => {
-      it.skip('should return a 200 response with the user', () => {
+      it('should return a 200 response with the user', () => {
         return request(app.getHttpServer())
           .get('/current_user')
+          .set('Authorization', `Bearer ${token.accessToken}`)
           .then(({ statusCode }) => {
             expect(statusCode).toBe(200);
           });
@@ -45,9 +52,49 @@ describe('CurrentUserController (e2e)', () => {
     });
 
     describe('with invalid credentials', () => {
-      it.skip('should return a 401 response with an error', () => {
+      it('should return a 401 response with an error', () => {
         return request(app.getHttpServer())
           .get('/current_user')
+          .then(({ statusCode }) => {
+            expect(statusCode).toBe(401);
+          });
+      });
+    });
+  });
+
+  describe('PATCH /current_user', () => {
+    describe('with valid credentials', () => {
+      it('should return a 204 response', () => {
+        return request(app.getHttpServer())
+          .patch('/current_user')
+          .set('Authorization', `Bearer ${token.accessToken}`)
+          .then(({ statusCode }) => {
+            expect(statusCode).toBe(204);
+          });
+      });
+
+      it('should return a 422 response with error when username already exist', async () => {
+        const newUser = await authService.signUp({
+          username: USER_USERNAME + '1',
+          password: USER_PASSWORD,
+        });
+
+        const newToken = authService.signIn(newUser);
+
+        return request(app.getHttpServer())
+          .patch('/current_user')
+          .send({ username: USER_USERNAME })
+          .set('Authorization', `Bearer ${newToken.accessToken}`)
+          .then(({ statusCode }) => {
+            expect(statusCode).toBe(422);
+          });
+      });
+    });
+
+    describe('with invalid credentials', () => {
+      it('should return a 401 response with an error', () => {
+        return request(app.getHttpServer())
+          .patch('/current_user')
           .then(({ statusCode }) => {
             expect(statusCode).toBe(401);
           });
