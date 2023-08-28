@@ -5,7 +5,7 @@ import * as request from 'supertest';
 import { AuthService } from './auth.service';
 import { mainConfig } from '../main.config';
 
-const USER_USERNAME = 'username';
+const USER_USERNAME = 'auth';
 const USER_PASSWORD = 'password';
 
 describe('AuthController (e2e)', () => {

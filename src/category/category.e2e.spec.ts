@@ -7,10 +7,6 @@ import { mainConfig } from '../main.config';
 import * as request from 'supertest';
 import { JwtDto } from '../auth/dto/jwt.dto';
 import { AuthService } from '../auth/auth.service';
-import {
-  USER_PASSWORD,
-  USER_USERNAME,
-} from '../current-user/current-user.e2e.spec';
 
 describe('CategoriesController (e2e)', () => {
   let app: INestApplication;
@@ -28,8 +24,8 @@ describe('CategoriesController (e2e)', () => {
     const authService = module.get<AuthService>(AuthService);
 
     const user = await authService.signUp({
-      username: USER_USERNAME,
-      password: USER_PASSWORD,
+      username: 'categories',
+      password: 'password',
     });
 
     token = authService.signIn(user);
