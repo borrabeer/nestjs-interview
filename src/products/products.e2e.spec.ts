@@ -6,10 +6,6 @@ import { mainConfig } from '../main.config';
 import { Product } from './entities/product.entity';
 import { ProductsService } from './products.service';
 import { AuthService } from '../auth/auth.service';
-import {
-  USER_PASSWORD,
-  USER_USERNAME,
-} from '../current-user/current-user.e2e.spec';
 import { JwtDto } from '../auth/dto/jwt.dto';
 
 describe('ProductsController (e2e)', () => {
@@ -28,8 +24,8 @@ describe('ProductsController (e2e)', () => {
     const authService = module.get<AuthService>(AuthService);
 
     const user = await authService.signUp({
-      username: USER_USERNAME,
-      password: USER_PASSWORD,
+      username: 'products',
+      password: 'password',
     });
 
     token = authService.signIn(user);

@@ -7,8 +7,8 @@ import { mainConfig } from '../main.config';
 import { User } from '../users/entities/user.entity';
 import { JwtDto } from '../auth/dto/jwt.dto';
 
-export const USER_USERNAME = 'username';
-export const USER_PASSWORD = 'password';
+const USER_USERNAME = 'current_user';
+const USER_PASSWORD = 'password';
 
 describe('CurrentUserController (e2e)', () => {
   let app: INestApplication;
@@ -74,17 +74,15 @@ describe('CurrentUserController (e2e)', () => {
       });
 
       it('should return a 422 response with error when username already exist', async () => {
-        const newUser = await authService.signUp({
+        await authService.signUp({
           username: USER_USERNAME + '1',
           password: USER_PASSWORD,
         });
 
-        const newToken = authService.signIn(newUser);
-
         return request(app.getHttpServer())
           .patch('/current_user')
-          .send({ username: USER_USERNAME })
-          .set('Authorization', `Bearer ${newToken.accessToken}`)
+          .send({ username: USER_USERNAME + '1' })
+          .set('Authorization', `Bearer ${token.accessToken}`)
           .then(({ statusCode }) => {
             expect(statusCode).toBe(422);
           });
